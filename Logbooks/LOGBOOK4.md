@@ -160,7 +160,7 @@ Afterwards, we can change some environment variables to test:
 ````bash
 $ export PATH=$PATH:/home/seed/Desktop
 $ export LD_LIBRARY_PATH=/home/seed/myScripts/
-$ export TEST
+$ export COURSE_NAME=FSI
 ````
 
 ```
