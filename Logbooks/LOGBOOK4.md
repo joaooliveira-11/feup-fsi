@@ -125,14 +125,26 @@ By using 'diff,' we can see that the environment variables of the parent process
 ![ForkDifference](/docs/week4/task2.png)
 
 ### Task 3
-- Nesta tarefa, vimos de que maneira as variáveis de ambiente são afetadas quando um novo programa é executado, usando 'execve()', que chama uma system call para um novo commando e executa-o.
-- Ao executar o ficheiro 'myenv.c' inicialmente 'execve()'  tem o terceiro argumento em NULL, logo dá um resultado vazio.
-- Ao mudarmos o terceiro argumento para 'environ' temos como resultado as variáveis de ambiente.
+In this task, we observed how environment variables are affected when a new program is executed using 'execve()', which invokes a system call for a new command and executes it.
+
+When running the 'myenv.c' file initially with 'execve()', the third argument is NULL, resulting in an empty outcome.
+
+When we change the third argument to 'environ,' we obtain the environment variables as a result.
+
+![EmptyFile](/docs/week4/task3(1).png)
+
+![VariablesFile](/docs/week4/task3(2).png)
 
 ### Task 4
-- Nesta tarefa, vimos de que maneira as variáveis de ambiente são afetadas quando um novo programa é executado, usando 'system()', que em vez de executar o comando diretamente como no caso do 'execve()', executa 'bin(sh -c command', ou seja, executa '/bin/sh' e pede à shell para executar o comando.
- Usando 'system()' estamos a passar as variáveis de ambiente para o novo programa '/bin/sh'.
-- A diferença entre 'execve()' e 'system()' é que a primeira executa o comando mantendo o processo e as variáveis de ambiente e a segunda cria um novo processo e passa todas as variáveis de ambiente para o novo processo.
+In this task, we observed how environment variables are affected when a new program is executed using 'system()', which, instead of executing the command directly as in the case of 'execve()', runs '/bin/sh -c command', in other words, it executes '/bin/sh' and requests the shell to run the command.
+
+When using 'system()', we are passing the environment variables to the new program '/bin/sh'.
+
+![SystemCommand](/docs/week4/task4(2).png)
+
+The output confirms that the system call passes the environment variables array to the execve call.
+
+![VariablesFile](/docs/week4/task4.png)
 
  ### Task 5
 - Set-UID é um mecanismo de segurança do Unix. Quando um programa com Set-UID corre, assume todos as previlégios do dono(ex: se root é o dono, o programa tem previlégios de root).
