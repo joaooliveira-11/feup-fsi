@@ -118,9 +118,11 @@ declare -x XMODIFIERS="@im=ibus"
 
 
 ### Task 2 
- - Guardamos as variáveis de ambiente de um processo pai num ficheiro e as variáveis de ambiente do processo filho noutro ficheiro.
+We saved the environment variables of a parent process in one file and the environment variables of the child process in another file.
 
- - Usando 'dif' podemos ver que as variáveis de ambiente do processo pai são todas herdadas pelo processo filho após o fork(), o que significa que não há diferença do ambiente de execução.
+By using 'diff,' we can see that the environment variables of the parent process are all inherited by the child process after the fork(). This means there is no difference in the execution environment.
+
+![ForkDifference](/docs/week4/task2.png)
 
 ### Task 3
 - Nesta tarefa, vimos de que maneira as variáveis de ambiente são afetadas quando um novo programa é executado, usando 'execve()', que chama uma system call para um novo commando e executa-o.
