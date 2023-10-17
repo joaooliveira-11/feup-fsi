@@ -122,7 +122,7 @@ We saved the environment variables of a parent process in one file and the envir
 
 By using 'diff,' we can see that the environment variables of the parent process are all inherited by the child process after the fork(). This means there is no difference in the execution environment.
 
-![ForkDifference](/docs/week4/task2.png)
+![ForkDifference](../docs/week4/task2.png)
 
 ### Task 3
 In this task, we observed how environment variables are affected when a new program is executed using 'execve()', which invokes a system call for a new command and executes it.
@@ -131,20 +131,20 @@ When running the 'myenv.c' file initially with 'execve()', the third argument is
 
 When we change the third argument to 'environ,' we obtain the environment variables as a result.
 
-![EmptyFile](/docs/week4/task3(1).png)
+![EmptyFile](../docs/week4/task3(1).png)
 
-![VariablesFile](/docs/week4/task3(2).png)
+![VariablesFile](../docs/week4/task3(2).png)
 
 ### Task 4
 In this task, we observed how environment variables are affected when a new program is executed using 'system()', which, instead of executing the command directly as in the case of 'execve()', runs '/bin/sh -c command', in other words, it executes '/bin/sh' and requests the shell to run the command.
 
 When using 'system()', we are passing the environment variables to the new program '/bin/sh'.
 
-![SystemCommand](/docs/week4/task4(2).png)
+![SystemCommand](../docs/week4/task4(2).png)
 
 The output confirms that the system call passes the environment variables array to the execve call.
 
-![VariablesFile](/docs/week4/task4.png)
+![VariablesFile](../docs/week4/task4.png)
 
  ### Task 5
 Set-UID is a Unix security mechanism. When a program with Set-UID runs, it assumes all the owner's privileges (e.g., if root is the owner, the program has root privileges).
