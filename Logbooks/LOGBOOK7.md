@@ -68,9 +68,8 @@ $ echo "AAAA%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X
 
 In the server, we get the following output:
 
-```
 
-```
+![Task2A](../docs/week7/taska_a.png)
 
 The final "41414141" is the string input adress. Between "AAAA" AND "41414141" there are 504 characters, and each adress has 8, so 504/8 = 63 adresses in the stack. We can conclude that to print the first 4 bytes of input is necessary 64 "%x".
 
