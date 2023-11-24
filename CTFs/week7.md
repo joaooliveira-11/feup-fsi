@@ -16,6 +16,8 @@ Analisando o código fonte, podemos ver que o programa usa 'scanf' para ler o in
 scanf("%32s", &buffer);
 ```
 
+Na linha 28, o programa dá print ao input do utilizador, e o utilizador tem controlo sobre o primeiro argumento do printf, o que pode levar a vulnerabilidades de "memory leaks", como a leitura ou alteração do valor de variáveis.
+
 Uma vez que a flag se encontra numa variável global e através do checksec percebemos que os endereços do programa são estáticos, podemos usar o gdb para obter o endereço da flag.
 
 Ao corrermos o script 'exploit_example.py' localmente, obtemos o o pid do processo que está a correr o programa.:
