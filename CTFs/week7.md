@@ -8,7 +8,7 @@ Ao corrermos checksec no executável, obtemos o seguinte:
 
 ![checksec](../docs/ctf7/checksec.png)
 
-A stack encontra-se protegida, o que significa que não podemos fazer buffer overflows. Existem proteções do endereço de retorno usando canários, porém o binário não é randomizado.
+É possível observar que o programa tem Partial RELRO, pelo que não existe risco de buffer overflow. Existem proteções do endereço de retorno usando canários, porém o binário não é randomizado. Um ataque com uso de buffer overflow será detetado antes de executar o código malacioso. Como o NX está ativado, os atacantes são impedidos de saltar para shellcode personalizado que eles armazenaram na stack ou em uma variável global. Não há PIE, então os ataques ROP não são dificultados.
 
 Analisando o código fonte, podemos ver que o programa usa 'scanf' para ler o input do utilizador, o que significa que podemos fazer um format string attack.
 
@@ -55,10 +55,43 @@ Ao corrermos o checksec obtemos este output:
 
 ![checksec2](../docs/ctf7/checksec2.png)
 
-O programa continua sem randomização de endereços. Desta vez o código fonte lança a bash se a variável 'key' for 0xBEEF, ou 48879 em decimal. Com esta backdoor podemos ter acesso total ao servidor e desta maneira conseguir o conteúdo da flag.
+À semelhança do primeiro desafio, o programa continua sem randomização de endereços e, por isso, já sabemos com o que estamos a lidar. Novamente: É possível observar que o programa tem No RELRO, pelo que não existe risco de buffer overflow. Existem proteções do endereço de retorno usando canários, porém o binário não é randomizado. Um ataque com uso de buffer overflow será detetado antes de executar o código malacioso. Como o NX está ativado, os atacantes são impedidos de saltar para shellcode personalizado que eles armazenaram na stack ou em uma variável global. Não há PIE, então os ataques ROP não são dificultados. 
 
-Como a variável 'key' é global, temos que ter acesso ao seu address. Para isso recorremos novamente ao gdb:
+Desta vez o código fonte lança a bash se a variável 'key' for 0xBEEF, ou 48879 em decimal. Com esta backdoor podemos ter acesso total ao servidor e desta maneira conseguir o conteúdo da flag.
 
+## Desafio 2 - Solução
+
+Como a variável 'key' é global, e por isso está alocada na Heap, temos que ter acesso ao seu address e mudar o valor, pelo que iremos recorrer a um ataque de format string usando "%n". Para isso recorremos novamente ao gdb:
+
+![key_adress](../docs/ctf7/key_adress_d2.png)
+
+Para descobrirmos a flag, vamos novamente usar um ataque de format string, no entanto, com algumas mudanças.
+
+Precisamos, então, de escrever um valor para dar match a "0xbeef" para abrir uma bash que vamos usar para obter o valor da flag, usando "cat flag.txt". Como sabemos que 0xbeef representa 48879 em decimal, este é o valor que a "key" deve ter.
+
+Para isso, escrevemos primeiro os 4 bytes para o endereço da variável. Os restantes 48875 bytes vão ser preenchidos com o formato %x com largura fixa. Com %[largura]x == %48875x, o programa irá ler 48875  bytes e irá tentar imprimi-los.
+
+Por último, o especificador %n impedirá a impressão desses bytes, mas ainda os contará, de modo que o valor armazenado no endereço será o valor que desejamos.
+
+Esta explicação é refletida no seguinte código:
+
+```
+from pwn import *
+
+p = remote("ctf-fsi.fe.up.pt", 4005)
+
+p.recvuntil(b"here...")
+p.sendline(b"\x24\xb3\x04\x08%48875x%1$n")
+p.interactive()
+```
+
+Para isso, criamos um scrip auxiliar como conteúdo anterior e após a sua execução tivemos o seguinte output:
+
+![scrip](../docs/ctf7/script_d2.png)
+
+![flag](../docs/ctf7/flag_d2.png)
+
+Ao executar conseguimos ter acesso ao conteúdo do ficheiro flag.txt e à flag do desafio, "flag{83b68c908c4bbdd8ec36f1f4802e73f2}"
 
 
 
