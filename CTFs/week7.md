@@ -57,7 +57,7 @@ Ao corrermos o checksec obtemos este output:
 
 À semelhança do primeiro desafio, o programa continua sem randomização de endereços e, por isso, já sabemos com o que estamos a lidar. Novamente: É possível observar que o programa tem No RELRO, pelo que não existe risco de buffer overflow. Existem proteções do endereço de retorno usando canários, porém o binário não é randomizado. Um ataque com uso de buffer overflow será detetado antes de executar o código malacioso. Como o NX está ativado, os atacantes são impedidos de saltar para shellcode personalizado que eles armazenaram na stack ou em uma variável global. Não há PIE, então os ataques ROP não são dificultados. 
 
-Desta vez o código fonte lança a bash se a variável 'key' for 0xBEEF, ou 48879 em decimal. Com esta backdoor podemos ter acesso total ao servidor e desta maneira conseguir o conteúdo da flag.
+Desta vez o código fonte lança a bash se a variável 'key' for 0xBEEF, ou 48879 em decimal (linha 18). Com esta backdoor podemos ter acesso total ao servidor e desta maneira conseguir o conteúdo da flag.
 
 ## Desafio 2 - Solução
 
