@@ -548,3 +548,119 @@ After uncommenting the line "copy_extensions = copy" from openssl.cnf and runnin
 The output confirms that the certificate has all the names added in the previous task.
 
 
+## 3.4 Task 4: Deploying Certificate in an Apache-Based HTTPS Website
+
+### Context
+In this task, we will see how public-key certificates are used by websites to secure web browsing. We will set up an HTTPS website based Apache. The Apache server, which is already installed in our container, supports the HTTPS protocol. To create an HTTPS website, we just need to configure the Apache server, so it knows where to get the private key and certificates.
+
+Since we forgot to update the lines in the "/etc/hosts", we did in this task by executing ```sudo gnome-text-editor /etc/hosts``` and we added the necessay lines.
+
+
+Following the steps in the seedlabs, we created an auxiliar folder with everything that we need for this task: Dockerfile, jonpedsam_apache_ssl.conf, index.html and index_red.html files and the server.crt and server.key files.
+
+We changed our Dockerfile to this:
+
+```
+FROM handsonsecurity/seed-server:apache-php
+
+ARG WWWDIR=/var/www/jonpedsam
+
+COPY ./index.html ./index_red.html $WWWDIR/
+COPY ./jonpedsam_apache_ssl.conf /etc/apache2/sites-available
+COPY ./certs/server.crt ./certs/server.key /certs/
+
+RUN chmod 400 /certs/server.key \
+    && chmod 644 $WWWDIR/index.html \
+    && chmod 644 $WWWDIR/index_red.html \
+    && a2ensite jonpedsam_apache_ssl
+
+CMD tail -f /dev/null
+```
+
+After, we changed our jonpedsam_apache_ssl.conf for this:
+
+```
+<VirtualHost *:443>
+    DocumentRoot /var/www/jonpedsam
+    ServerName     www.jonpedsam.com
+    ServerAlias    www.jonpedsamC.com
+    ServerAlias    www.jonpedsamD.com
+    DirectoryIndex index.html
+    SSLEngine On
+    SSLCertificateFile /certs/server.crt
+    SSLCertificateKeyFile /certs/server.key
+</VirtualHost>
+
+<VirtualHost *:80>
+    DocumentRoot /var/www/jonpedsam
+    ServerName www.jonpedsam.com
+    DirectoryIndex index_red.html
+</VirtualHost>
+```
+
+Since we are using our custom files, we needed to change the docker-compose to execute this directory, by changing build to : ./task4_aux.
+
+Then, we executed dcbuild and dcup to execute the apache command and start the server:
+
+![task4_1](../docs/logbook11/task4_1.png)
+
+
+After, we tried to access our server in the browser and we got a warning:
+
+![task4_2](../docs/logbook11/task4_warning.png)
+
+To solve this, we imported our CA that we used in this lab to the trusted browser authorities:
+
+![task4_cm](../docs/logbook11/task4_cm.png)
+
+After, as expected, we access our server with success.
+
+![task4_cm](../docs/logbook11/task4_aftercm.png)
+
+
+## 3.5 Task 5: Launching a Man-In-The-Middle Attack
+
+### Context
+
+Assume Alice wants to visit example.com via the HTTPS protocol. She needs to get the public key from the example.com server; Alice will generate a secret, and encrypt the secret using the server’s public key, and send it to the server. If an attacker can intercept the communication between Alice and the server, the attacker can replace the server’s public key with its own public key. Therefore, Alice’s secret is actually encrypted with the attacker’s public key, so the attacker will be able to read the secret. The attacker can forward the secret to the server using the server’s public key. The secret is used to encrypt the communication between Alice and server, so the attacker can decrypt the encrypted communication.
+
+### Step 1: Setting up the malicious website
+
+For this step, we changed the jonpedsam_apache_ssl.conf to include our target website (facebook):
+
+```
+<VirtualHost *:443>
+    DocumentRoot /var/www/jonpedsam
+    ServerName     www.facebook.com
+    ServerAlias    www.jonpedsam.com
+    ServerAlias    www.jonpedsamC.com
+    ServerAlias    www.jonpedsamD.com
+    DirectoryIndex index.html
+    SSLEngine On
+    SSLCertificateFile /certs/server.crt
+    SSLCertificateKeyFile /certs/server.key
+</VirtualHost>
+
+<VirtualHost *:80>
+    DocumentRoot /var/www/jonpedsam
+    ServerName www.facebook.com
+    DirectoryIndex index_red.html
+</VirtualHost>
+```
+
+### Step 2: Becoming the man in the middle
+
+In this step, we are performing a man in the middle attack, "we simply modify the victim’s machine’s /etc/hosts file to emulate the result of a DNS cache positing attack by mapping the hostname www.example.com to our malicious web server" (from lab instructions).
+
+10.9.0.80 www.instagram.com
+
+
+### Step 3: Browse the target website
+
+When we tried to access www.facebook.com, we got the following warning:
+
+![task5_w](../docs/logbook11/task5_w.png)
+
+This is attributed to the inconsistency of the certificate used because the domain name does not match that present in the server's certificate.
+
+This type of websites detect this and warn the user.
