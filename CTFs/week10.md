@@ -108,8 +108,6 @@ def dec(k, c, nonce):
     return msg
 ```
 
-Now, when we run the script, we can see the flag, whihc means that our attack was successful
+Now, when we run the script, we can see the flag, which means that our attack was successful:
 
-
-Finally, we got the flag:
 ![flag](../docs/week10/flag.png)
