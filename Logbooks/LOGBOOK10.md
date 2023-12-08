@@ -58,13 +58,13 @@ For most of the ciphers, an operation mode is also provided (cbc, cfb, ctr, ecb,
 We tested the following commands:
 
 ```bash
-12:19:24 : diogotvf7@diogotvf7 $ openssl enc -aes128 -e -in dec.txt -out cipher.bin -K 00112233445566778889aabbccddeeff -iv 0102030405060708
+$ openssl enc -aes128 -e -in dec.txt -out cipher.bin -K 00112233445566778889aabbccddeeff -iv 0102030405060708
 hex string is too short, padding with zero bytes to length
 
-12:27:03 : diogotvf7@diogotvf7 $ openssl enc -aria-128-ctr -e -in dec.txt -out cipher.bin -K 00112233445566778889aabbccddeeff -iv 0102030405060708
+$ openssl enc -aria-128-ctr -e -in dec.txt -out cipher.bin -K 00112233445566778889aabbccddeeff -iv 0102030405060708
 hex string is too short, padding with zero bytes to length
 
-12:28:03 : diogotvf7@diogotvf7 $ openssl enc -aria-128-ecb -e -in dec.txt -out cipher.bin -K 00112233445566778889aabbccddeeff
+$ openssl enc -aria-128-ecb -e -in dec.txt -out cipher.bin -K 00112233445566778889aabbccddeeff
 ```
 
 **Note**: The last encryption method does not need -iv because it is in ecb mode which encrypts the blocks independently of each other.
