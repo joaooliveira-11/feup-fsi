@@ -1,27 +1,31 @@
-# CTF Semana #8 (SQL Injection)
-## Introdução
-Para este CTF apenas nos foi dado um ficheiro index.php que é o código que corre no servidor que se encontra em http://ctf-fsi.fe.up.pt:5003/. Também nos foi dito que a flag se encontra num ficheiro flag.txt cujo conteúdo é mostrado a quem se autenticar no servidor.
+# CTF Week #8 (SQL Injection)
+## Introduction
+For this CTF we were only given an index.php file which is the code that runs on the server that is located at http://ctf-fsi.fe.up.pt:5003/. We were also told that the flag is in a file called flag.txt whose contents are shown to those who authenticate on the server.
 
-No servidor podemos encontrar a seguinte página de login:
+In the server we can find the following login page:
 
 ![login](../docs/ctf8/login-page.png)
 
-## Pistas
-A partir da visualização do código podemos analisar que a preparação da query à base de dados não é segura uma vez que não são feitos quaiquer escapes às strings de input do utilizador. Isto facilita todo o processo de SQL Injection.
+## Clues
+ From the code we can see that the preparation of the query to the database is not safe since no escapes are made to the user's input strings. This facilitates the whole SQL Injection process.
 
-## Solução
-A primeira intuição que tivemos foi tentar dar login com o username admin. No entanto, como não sabemos qual a sua palara-passe, devemos tentar comentar o resto da querry de maneira a apenas necessitarmos de fornecer o username do utilizador a que pretendemos aceder. Inserimos por isso o seguinte:
+## Solution
+The first intuition we had was to try to login with the username admin. However, as we do not know its password, we must try to comment out the rest of the query so that we only need to provide the username of the user we want to access. We therefore insert the following:
+
+```
 
 ![injection](../docs/ctf8/injection.png)
 
-O username que escremos faz com que a query seja a seguinte:
+The username we write makes the query to be the following:
+
+``
 
 ```sql
 SELECT * FROM users WHERE username = 'admin' -- - ' AND password = '.'
 ``````
 
 
-Basicamente inserimos o nome do administrador e fechamos a aspa que contém a string do username. Com isto, o resto do input será interpretado como código SQL. Inserindo dois traços (--) após o fecho da aspa estaremos a comentar toda a query que seria feita de seguida, que neste caso é a verificação da palavra-passe. Deste modo podemos facilmente fazer login sem saber a palavra-passe do administrador. Conseguimos, assim, a flag:
+Basically we enter the name of the administrator and close the apostrophe that contains the username string. With this, the rest of the input will be interpreted as SQL code. By inserting two dashes (--) after closing the apostrophe we will be commenting out the entire query that would be done next, which in this case is the password verification. This way we can easily log in without knowing the administrator's password. We can thus get the flag:
 
 ![flag](../docs/ctf8/flag.png)
 

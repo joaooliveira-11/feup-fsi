@@ -1,35 +1,35 @@
 # XSS + CSRF
 
-## Pistas
+## Clues
 
-De modo a realizar este CTF, foram-nos fornecidas algumas pistas:
+In order to carry out this CTF, we were given some clues:
 
-- Na porta 5004 do servidor ctf-fsi.fe.up.pt encontra-se um servidor no qual poderemos fazer um pedido ao administrador para que este nos dê acesso à flag.
-- O administrador aceitará o nosso pedido através da porta 5005 onde se encontram dois botões: um para aceitar o pedido e outro para rejeitar. Estes botões encontram-se desativados para nós.
-- A nossa página dá refresh de 5 em 5 segundos e a resposta do administrador pode demorar até 2 minutos.
+On port 5004 of the server ctf-fsi.fe.up.pt there is a server where we can make a request to the administrator for him to give us access to the flag.
+The administrator will accept our request through port 5005 where there are two buttons: one to accept the request and another to reject it. These buttons are disabled for us.
+Our page refreshes every 5 seconds and the administrator's response can take up to 2 minutes.
 
-Para além deste contexto também nos são fornecidas duas dicas muito importantes relativas às técnicas que devemos usar para resolver este CTF:
+In addition to this context, we are also given two very important tips related to the techniques we should use to solve this CTF:
 
-> - `Cross-site Scripting`: consiste em injectar código em input do utilizador. Explora as páginas web como um utilizador comum e descobre que input podes controlar.
-> - `Cross-site Request Forgery`: consiste em, numa página com uma dada origem, fazer pedidos a uma página numa origem diferente. Explora que diferentes páginas existem e que pedidos desejas executar.
+> - `Cross-site Scripting`: It consists of injecting code into user input. Explore web pages like a regular user and find out what input you can control.
+> - `Cross-site Request Forgery`: It consists of, on a page with a given origin, making requests to a page in a different origin. Explore what different pages exist and what requests you want to execute.
 
-## Servidor
+## Server
 
-Ao entrar no servidor somos recebidos com a seguinte página:
+Entering the server on port 5004 we are presented with the following page:
 
 <img src="../docs/ctf6/request.png">
 
-Esta página possui uma entrada de texto que, após submissão nos leva à seguinte página:
+This page has a text input that, after submission, takes us to the following page:
 
 <img src="../docs/ctf6/request4541888198e50dfa3fa15ec02794bd1c57134e6c.png">
 
-Esta página é a página que dá refresh de `5s em 5s` tornando-se difícil verificar o seu **HTML** ou os pedidos que faz. No entanto, e tendo em conta as pistas fornecidas, começamos a perceber que o input da primeira página provavelmente será o local onde deveremos fazer a nossa injeção de código.
+This page is the page that refreshes every 5s making it difficult to check its HTML or the requests it makes. However, taking into account the clues provided, we begin to realize that the input of the first page will probably be the place where we should do our code injection.
 
-A segunda página possui um botão que nos permite chegar à página do administrador:
+The second page has a button that allows us to reach the administrator's page:
 
 <img src="../docs/ctf6/admin-request.png">
 
-Esta página possui, tal como referia a pista, dois botões que se encontram desativados para nós. Verificando o **HTML** desta página conseguimos ver o pedido que cada um dos botões faz:
+This page has, as the clue mentioned, two buttons that are disabled for us. Checking the HTML of this page we can see the request that each of the buttons makes:
 
 ```html
 <form
@@ -43,13 +43,13 @@ Esta página possui, tal como referia a pista, dois botões que se encontram des
 </form>
 ```
 
-Verificamos rapidamente que o botão que nos interessa é o primeiro, uma vez que é este que emite um método post que aceita o nosso pedido. Se tentarmos executar este pedido manualmente aparece-nos a seguinte página:
+We quickly verify that the button that interests us is the first one, since it is this one that issues a post method that accepts our request. If we try to execute this request manually, the following page appears to us:
 
 <img src="../docs/ctf6/method-not-allowed.png">
 
-## Ataque
+## Attack
 
-Sendo o nosso objetivo que o administrador emita o método post que aceita o nosso id atual, podemos fazê-lo inserindo um form semelhante ao que se encontra na **porta 5005** na página inicial da **porta 5004**. O form que nós fizemos foi o seguinte:
+Since our goal is for the administrator to issue the post method that accepts our current id, we can do it by inserting a form similar to the one found on port 5005 on the home page of port 5004. The form we made was the following:
 
 ```html
 <form
@@ -66,12 +66,12 @@ Sendo o nosso objetivo que o administrador emita o método post que aceita o nos
 </form>
 ```
 
-As alterações que fizemos ao form original consistiram em remover o atributo `disabled` do botão de `submit` e adicionámos um script que faz com que do lado do administrador o botão seja clicado automaticamente.
-Deste modo o administrador emitirá o pedido pretendido.
+The changes we made to the original form consisted of removing the disabled attribute from the submit button and adding a script that causes the button to be automatically clicked on the administrator's side. 
+In this way, the administrator will issue the desired request:
 
 ---
 
-Por fim, apenas temos mais um problema! A página para a qual somos redirecionados após a submissão no input possui o seguinte script (já referido anteriormente):
+Finally, we just have one more problem! The page to which we are redirected after submission in the input has the following script (already mentioned earlier):
 
 ```html
 <script>
@@ -81,18 +81,18 @@ Por fim, apenas temos mais um problema! A página para a qual somos redirecionad
 </script>
 ```
 
-Este script causa um refresh da página de `5s em 5s` causando assim um refresh do id válido do nosso pedido. De maneira a contornar este problema podemos **desativar o javascript do nosso browser**:
+This script causes a page refresh every 5s, thus refreshing the valid id of our request. To circumvent this problem we can disable javascript in our browser:
 
 <img src="../docs/ctf6/disable-javascript.png">
 
 ---
 
-Posto isto, conseguimos finalmente obter a flag a partir dos seguintes passos:
+Having said that, we can finally obtain the flag from the following steps:
 
-1. Inserir o form na página inicial da porta 5004;
+1. Insert the form on the home page of port 5004;
    <img src="../docs/ctf6/step1.png">
 
-2. Após submeter o form no input, dar refresh manualmente à página uma vez que o nosso pedido foi aceite do lado do administrador;
+2. After submitting the form in the input, manually refresh the page once our request has been accepted by the administrator;
 
-3. A nossa flag aparece no ecrã!
+3. Our flag appears on the screen!
    <img src="../docs/ctf6/step3.png">
