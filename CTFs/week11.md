@@ -9,6 +9,7 @@ This week, we explored the cipher mechanism based in RSA in association with fac
 We are told the module is generated through 2 prime numbers:
 - p, close to 2^512
 - q, close to 2^512
+
 To find the module we first need to get these 2 numbers that multiply to get the so desired **n**. We just need a function to determine if a number is prime and use this code:
 
 ```python
