@@ -17,3 +17,13 @@ The handshake goes from frame 814 to 819 as we can see in the following image, t
 In the server hello, we can see the cyper that it chose to use, in this case it was TLS_RSA_WITH_AES_128_CBC_SHA256.
 ![cipher](../docs/week13/cipher.png)
 
+For the total encrypted app data exchanged, we just add the length of the app data in frames 820 and 821, which is 1184 + 80 = 1264.
+
+![frame820](../docs/week13/frame820.png)
+![frame821](../docs/week13/frame821.png)
+
+Finally, we need to find the size of the encrypted message on the frame that concludes the handshake. We can do this by looking at the size of the app data in frame 819, which is 80.
+
+![frame819](../docs/week13/frame819.png)
+
+We can now build the final flag: flag{814824TLS_RSA_WITH_AES_128_CBC_SHA256126480}
