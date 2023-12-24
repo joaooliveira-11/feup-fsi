@@ -139,6 +139,17 @@ Then, using WireShark program, we can verify that the packet was sent and receiv
 
 "It should be noted that this experiment only gets an estimated result, because in theory, not all these packets take the same route (but in practice, they may within a short period of time). The code in the following shows one round in the procedure."
 
+For that, we used the following python script: to find the distance from our VM and '8.8.8.8':
+```python
+#!/usr/bin/env python3
+from scapy.all import *
+
+for i in range(1, 50):
+    p = IP(dst='8.8.8.8', ttl=i) / ICMP()
+    p.show()
+    send(p)
+```
+
 We can conclude that we needed 21 routers (TTL=21) until it got to the destination.
 
 ![pings](../docs/logbook13/pings_updated.png)
