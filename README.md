@@ -1,8 +1,5 @@
-Breve descrição do grupo
+# Team
 
-* Turno: L11
-* Grupo: 02
-* Alunos:
-    - João Oliveira up202108737
-    - Pedro Magalhães up202108756
-    - Samuel Oliveira up202108751
+* João Oliveira, up202108737@edu.fe.up.pt 
+* Pedro Magalhães, up202108756@edu.fe.up.pt
+* Samuel Oliveira, up202108751@edu.fe.up.pt
