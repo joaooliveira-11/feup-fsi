@@ -131,7 +131,54 @@ Then, using WireShark program, we can verify that the packet was sent and receiv
 ![WireSharkZoom](../docs/logbook13/wireshark_zoom.png)
 
 
+# Task 1.3: Traceroute
+
+## Context
+
+"The objective of this task is to use Scapy to estimate the distance, in terms of number of routers, between your VM and a selected destination. This is basically what is implemented by the traceroute tool. In this task, we will write our own tool. The idea is quite straightforward: just send an packet (any type) to the destination, with its Time-To-Live (TTL) field set to 1 first. This packet will be dropped by the first router, which will send us an ICMP error message, telling us that the time-to-live has exceeded. That is how we get the IP address of the first router. We then increase our TTL field to 2, send out another packet, and get the IP address of the second router. We will repeat this procedure until our packet finally reach the destination."
+
+"It should be noted that this experiment only gets an estimated result, because in theory, not all these packets take the same route (but in practice, they may within a short period of time). The code in the following shows one round in the procedure."
+
+We can conclude that we needed 21 routers (TTL=21) until it got to the destination.
+
+![pings](../docs/logbook13/pings_updated.png)
 
 
+# Task 1.4
 
+For this task the objective was to implement a sniff-and-then-spoof program using Scapy. The program was designed to run on a virtual machine (VM) monitoring a local area network (LAN).
+
+## Setup:
+- Two machines on the same LAN: VM (for running the sniff-and-spoof program) and the user container.
+- Utilized Scapy for packet sniffing and spoofing.
+
+## Procedure:
+1. Pinging three different IP addresses from the user container:
+    - ping 1.2.3.4 ->  non-existing host on the Internet.
+    - ping 10.9.0.99 ->  A non-existing host on the LAN.
+    - ping 8.8.8.8  ->  An existing host on the Internet.
+
+2. Sniff-and-Spoof Program Operation:
+    - The program on the VM monitored the LAN for ICMP echo requests.
+    - Upon detecting any ICMP echo request, regardless of the target IP address, the program immediately sent out an echo reply using packet spoofing.
+
+## Results:
+
+### 1. Pinging 1.2.3.4 (Non-existing host on the Internet):
+   - **Explanation:**
+        - The spoofing program responded to ICMP echo requests for any target IP address, including non-existing hosts.
+        - ARP protocol was likely involved. When the user container sent a ping to a non-existing host, it broadcasted an ARP request on the LAN. The VM's sniff-and-spoof program intercepted this request and responded with a spoofed echo reply.
+
+### 2. Pinging 10.9.0.99 (Non-existing host on the LAN):
+   - **Explanation:**
+        - The program responded to all ICMP echo requests, regardless of the target's existence on the LAN.
+        - ARP requests triggered by the ping to a non-existing LAN host were intercepted and spoofed by the program.
+
+### 3. Pinging 8.8.8.8 (Existing host on the Internet):
+   - **Explanation:**
+        - The program's response to ICMP echo requests did not depend on the actual existence of the target host.
+        - The ARP protocol and routing information were likely utilized to correctly handle the requests and provide consistent responses.
+
+## Conclusion:
+The experiment demonstrated that the sniff-and-then-spoof program successfully manipulated the ICMP echo requests on the LAN, consistently generating spoofed echo replies regardless of the target's actual existence. This highlights the vulnerability of relying solely on ICMP echo replies for network availability assessment and emphasizes the importance of securing against such spoofing attacks.
 
